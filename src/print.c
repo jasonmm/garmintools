@@ -1533,6 +1533,16 @@ GARMIN_ENUM_NAME(1002,duration_type) {
   GARMIN_ENUM_DEFAULT;
 }
 
+static void
+xml_clean_str ( char * s)
+{
+  do {
+    if( *s > 127 || *s < 32 || *s == 34 || *s == 60 || *s == 62) {
+      *s = ' ';
+    }
+    s++;
+  } while ( *s );
+}
 
 static void
 garmin_print_d1002 ( D1002 * x, FILE * fp, int spaces )
@@ -1540,6 +1550,7 @@ garmin_print_d1002 ( D1002 * x, FILE * fp, int spaces )
   unsigned int i;
 
   print_spaces(fp,spaces);
+  xml_clean_str(x->name);
   fprintf(fp,"<workout type=\"1002\" name=\"%s\" steps=\"%d\" "
           "sport_type=\"%s\"",
           x->name,x->num_valid_steps,garmin_d1000_sport_type(x->sport_type));
@@ -1547,6 +1558,7 @@ garmin_print_d1002 ( D1002 * x, FILE * fp, int spaces )
     fprintf(fp,">\n");
     for ( i = 0; i < x->num_valid_steps; i++ ) {
       print_spaces(fp,spaces+1);
+      xml_clean_str(x->steps[i].custom_name);
       fprintf(fp,"<step name=\"%s\">\n",x->steps[i].custom_name);
       GARMIN_TAGSTR(1,"intensity",
                     garmin_d1001_intensity(x->steps[i].intensity));
